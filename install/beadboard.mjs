@@ -231,11 +231,13 @@ async function main() {
     const doltState = dolt
       ? startDoltInProject(process.cwd())
       : { attempted: false, started: false, message: null };
+    const startRoot = hasDevScript(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
     if (process.env.BB_START_NOOP === '1') {
       output(
         {
           ok: true,
           command: 'start',
+          startRoot,
           doltRequested: dolt,
           doltAttempted: doltState.attempted,
           doltStarted: doltState.started,
@@ -245,7 +247,6 @@ async function main() {
       );
       return;
     }
-    const startRoot = hasDevScript(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
     const child = spawn('npm', ['run', 'dev'], {
       cwd: startRoot,
       stdio: 'inherit',
