@@ -187,6 +187,15 @@ function openUrl(url) {
   child.unref();
 }
 
+function hasDevScript(dir) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+    return Boolean(pkg.scripts && pkg.scripts.dev);
+  } catch {
+    return false;
+  }
+}
+
 function startDoltInProject(cwd) {
   const bdPath = resolveBdPath();
   if (!bdPath) {
@@ -222,11 +231,13 @@ async function main() {
     const doltState = dolt
       ? startDoltInProject(process.cwd())
       : { attempted: false, started: false, message: null };
+    const startRoot = hasDevScript(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
     if (process.env.BB_START_NOOP === '1') {
       output(
         {
           ok: true,
           command: 'start',
+          startRoot,
           doltRequested: dolt,
           doltAttempted: doltState.attempted,
           doltStarted: doltState.started,
@@ -236,7 +247,6 @@ async function main() {
       );
       return;
     }
-    const startRoot = fs.existsSync(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
     const child = spawn('npm', ['run', 'dev'], {
       cwd: startRoot,
       stdio: 'inherit',
