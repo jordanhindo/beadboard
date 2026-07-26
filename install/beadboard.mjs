@@ -187,6 +187,15 @@ function openUrl(url) {
   child.unref();
 }
 
+function hasDevScript(dir) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+    return Boolean(pkg.scripts && pkg.scripts.dev);
+  } catch {
+    return false;
+  }
+}
+
 function startDoltInProject(cwd) {
   const bdPath = resolveBdPath();
   if (!bdPath) {
@@ -236,7 +245,7 @@ async function main() {
       );
       return;
     }
-    const startRoot = fs.existsSync(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
+    const startRoot = hasDevScript(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
     const child = spawn('npm', ['run', 'dev'], {
       cwd: startRoot,
       stdio: 'inherit',
