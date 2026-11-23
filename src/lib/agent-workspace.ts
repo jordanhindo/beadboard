@@ -1,5 +1,6 @@
 import { listProjects } from './registry';
 import { resolveProjectScope } from './project-scope';
+import { getCurrentProjectRoot } from './current-project-root';
 
 export interface ResolveAgentWorkspaceOptions {
   currentProjectRoot?: string;
@@ -14,7 +15,7 @@ export interface ResolvedAgentWorkspace {
 }
 
 export async function resolveAgentWorkspace(options: ResolveAgentWorkspaceOptions = {}): Promise<ResolvedAgentWorkspace> {
-  const currentProjectRoot = options.currentProjectRoot ?? process.cwd();
+  const currentProjectRoot = options.currentProjectRoot ?? getCurrentProjectRoot();
 
   if (options.requestedProjectRoot && options.requestedProjectRoot.trim()) {
     const root = options.requestedProjectRoot.trim();

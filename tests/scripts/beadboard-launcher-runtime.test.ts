@@ -86,3 +86,29 @@ test('start uses runtimeRoot when it contains a package.json with a dev script',
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('start passes the directory it was run from as the project root', async () => {
+  const projectDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'bb-start-project-')));
+  try {
+    const env: NodeJS.ProcessEnv = { ...process.env, BB_START_NOOP: '1' };
+    delete env.BB_PROJECT_ROOT;
+    const { stdout } = await execFileAsync(process.execPath, [launcherPath, 'start', '--json'], {
+      cwd: projectDir,
+      env,
+    });
+    const payload = JSON.parse(stdout);
+    assert.equal(payload.ok, true);
+    assert.equal(payload.projectRoot, projectDir);
+    // The dev server still runs from the BeadBoard install, not the project.
+    assert.notEqual(payload.startRoot, projectDir);
+  } finally {
+    fs.rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
+test('start keeps an explicit BB_PROJECT_ROOT', async () => {
+  const { stdout } = await execFileAsync(process.execPath, [launcherPath, 'start', '--json'], {
+    env: { ...process.env, BB_START_NOOP: '1', BB_PROJECT_ROOT: '/explicit/project' },
+  });
+  assert.equal(JSON.parse(stdout).projectRoot, '/explicit/project');
+});

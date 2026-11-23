@@ -3,6 +3,7 @@ import path from 'node:path';
 import { readIssuesFromDisk } from '../../../../../lib/read-issues';
 import { activityEventBus } from '../../../../../lib/realtime';
 import { getAgentMetrics } from '../../../../../lib/agent-sessions';
+import { getCurrentProjectRoot } from '../../../../../lib/current-project-root';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ function isValidProjectRoot(root: string): boolean {
       return false;
     }
     // Prevent path traversal by ensuring resolved path stays within the project root
-    const allowedBase = process.cwd();
+    const allowedBase = getCurrentProjectRoot();
     const relative = path.relative(allowedBase, resolved);
     // If "resolved" is outside "allowedBase", "relative" will start with ".."
     if (relative.startsWith('..') || path.isAbsolute(relative)) {
@@ -32,7 +33,7 @@ export async function GET(
   const { agentId } = await params;
   const url = new URL(request.url);
   const projectRootParam = url.searchParams.get('projectRoot');
-  const projectRoot = projectRootParam ?? process.cwd();
+  const projectRoot = projectRootParam ?? getCurrentProjectRoot();
 
   if (projectRootParam && !isValidProjectRoot(projectRootParam)) {
     return NextResponse.json({ ok: false, error: 'Invalid projectRoot path' }, { status: 400 });

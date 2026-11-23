@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import { runBdCommand } from '../../../../lib/bridge';
+import { getCurrentProjectRoot } from '../../../../lib/current-project-root';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
-  const projectRoot = searchParams.get('projectRoot') ?? process.cwd();
+  const projectRoot = searchParams.get('projectRoot') ?? getCurrentProjectRoot();
 
   const result = await runBdCommand({
     projectRoot,

@@ -4,6 +4,7 @@ import { readIssuesFromDisk } from '../../../lib/read-issues';
 import { activityEventBus } from '../../../lib/realtime';
 import { buildSessionTaskFeed, getCommunicationSummary, getAgentLivenessMap, calculateIncursions } from '../../../lib/agent-sessions';
 import { listAgents } from '../../../lib/agent-registry';
+import { getCurrentProjectRoot } from '../../../lib/current-project-root';
 
 function isValidProjectRoot(root: string): boolean {
   try {
@@ -12,7 +13,7 @@ function isValidProjectRoot(root: string): boolean {
       return false;
     }
     // Prevent path traversal by ensuring resolved path stays within the project root
-    const allowedBase = process.cwd();
+    const allowedBase = getCurrentProjectRoot();
     const relative = path.relative(allowedBase, resolved);
     // If "resolved" is outside "allowedBase", "relative" will start with ".."
     if (relative.startsWith('..') || path.isAbsolute(relative)) {
@@ -29,7 +30,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const projectRootParam = url.searchParams.get('projectRoot');
-  const projectRoot = projectRootParam ?? process.cwd();
+  const projectRoot = projectRootParam ?? getCurrentProjectRoot();
 
   if (projectRootParam && !isValidProjectRoot(projectRoot)) {
     return NextResponse.json(

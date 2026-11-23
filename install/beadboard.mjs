@@ -75,6 +75,7 @@ function output(payload, asJson) {
   if (payload.command === 'start') {
     const startLines = [
       'Starting BeadBoard dev server...',
+      `Project: ${payload.projectRoot}`,
       'Tip: In your project folder, run `bd dolt start` first.',
       'Shortcut: `beadboard start --dolt` runs Dolt + BeadBoard startup together.',
     ];
@@ -232,12 +233,16 @@ async function main() {
       ? startDoltInProject(process.cwd())
       : { attempted: false, started: false, message: null };
     const startRoot = hasDevScript(runtime.runtimeRoot) ? runtime.runtimeRoot : repoRoot;
+    // The dev server runs inside startRoot, so pass the directory the user ran
+    // `beadboard start` from as the project to show.
+    const projectRoot = process.env.BB_PROJECT_ROOT || process.cwd();
     if (process.env.BB_START_NOOP === '1') {
       output(
         {
           ok: true,
           command: 'start',
           startRoot,
+          projectRoot,
           doltRequested: dolt,
           doltAttempted: doltState.attempted,
           doltStarted: doltState.started,
@@ -251,6 +256,7 @@ async function main() {
       cwd: startRoot,
       stdio: 'inherit',
       shell: process.platform === 'win32',
+      env: { ...process.env, BB_PROJECT_ROOT: projectRoot },
     });
     child.on('error', (err) => {
       process.stderr.write(`Error: Failed to start dev server: ${err.message}\n`);
@@ -261,6 +267,7 @@ async function main() {
       {
         ok: true,
         command: 'start',
+        projectRoot,
         doltRequested: dolt,
         doltAttempted: doltState.attempted,
         doltStarted: doltState.started,
