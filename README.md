@@ -91,6 +91,8 @@ bd init                        # initialize Beads in your project
 beadboard start --dolt         # start the dashboard with Dolt (recommended)
 ```
 
+To use another port, run `beadboard start --dolt --port 4000`. BeadBoard saves the port of the running server in `~/.beadboard/server.json`, so `beadboard status` and `beadboard open` find it without `--port`. Port priority: `--port` > `BB_PORT` > running server > `PORT` > `3000`.
+
 Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
