@@ -23,6 +23,7 @@ import {
   type MessageCategory,
   type MessageState,
 } from './types';
+import { getCurrentProjectRoot } from '../current-project-root';
 
 const MESSAGE_ID_PATTERN = /^msg_/;
 const AGENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -71,7 +72,7 @@ function toBeadId(name: string): string {
 }
 
 async function getProjectRoot(deps: { projectRoot?: string }): Promise<string> {
-  return deps.projectRoot || process.cwd();
+  return deps.projectRoot || getCurrentProjectRoot();
 }
 
 async function verifyAgentExists(agent: string, projectRoot: string): Promise<boolean> {

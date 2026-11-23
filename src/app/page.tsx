@@ -9,6 +9,7 @@ import { detectPiRuntimeStrategy } from '../lib/pi-runtime-detection';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { getCurrentProjectRoot } from '../lib/current-project-root';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +58,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   const registryProjects = await listProjects();
   const scope = resolveProjectScope({
-    currentProjectRoot: process.cwd(),
+    currentProjectRoot: getCurrentProjectRoot(),
     registryProjects,
     requestedProjectKey,
     requestedMode,

@@ -9,6 +9,7 @@ import {
   readCoordEventsFromDisk,
 } from './coord-projections';
 
+import { getCurrentProjectRoot } from './current-project-root';
 export type AgentSessionState = 'active' | 'reviewing' | 'deciding' | 'needs_input' | 'completed' | 'stale' | 'evicted' | 'idle' | 'stuck' | 'dead';
 
 export interface SessionTaskCard {
@@ -109,7 +110,7 @@ export function getMissionsByAgent(feed: EpicBucket[]): Record<string, SessionTa
 }
 
 export async function getAgentLivenessMap(
-  projectRoot: string = process.cwd(),
+  projectRoot: string = getCurrentProjectRoot(),
   activityHistory: ActivityEvent[] = []
 ): Promise<Record<string, string>> {
   const agentsResult = await listAgents({}, { projectRoot });
@@ -154,7 +155,7 @@ export interface Incursion {
  * Calculates global incursions by comparing all active reservations.
  */
 export async function calculateIncursions(
-  projectRoot: string = process.cwd(),
+  projectRoot: string = getCurrentProjectRoot(),
   agentLivenessMap: Record<string, string> = {},
 ): Promise<Incursion[]> {
   const events = await readCoordEventsFromDisk(projectRoot);
@@ -165,7 +166,7 @@ export async function calculateIncursions(
 /**
  * Gathers all relevant communication for all agents to build a summary for aggregation.
  */
-export async function getCommunicationSummary(projectRoot: string = process.cwd()): Promise<CommunicationSummary> {
+export async function getCommunicationSummary(projectRoot: string = getCurrentProjectRoot()): Promise<CommunicationSummary> {
   const coordMessages = await projectInboxFromDisk(projectRoot);
   return { messages: coordMessages };
 }

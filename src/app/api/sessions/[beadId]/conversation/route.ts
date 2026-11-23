@@ -4,6 +4,7 @@ import { getCommunicationSummary } from '../../../../../lib/agent-sessions';
 import { readInteractionsViaBd } from '../../../../../lib/read-interactions';
 import type { ActivityEvent } from '../../../../../lib/activity';
 import type { AgentMessage } from '../../../../../lib/agent-mail';
+import { getCurrentProjectRoot } from '../../../../../lib/current-project-root';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ export async function GET(
   const { beadId } = await params;
   const url = new URL(request.url);
   const projectRootSearchParam = url.searchParams.get('projectRoot');
-  const projectRoot = projectRootSearchParam || process.cwd();
+  const projectRoot = projectRootSearchParam || getCurrentProjectRoot();
 
   try {
     // 1. Get activity events for this bead

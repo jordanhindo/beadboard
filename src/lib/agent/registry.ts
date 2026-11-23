@@ -15,6 +15,7 @@ import type {
   ActivityLeaseInput,
   AgentLiveness,
 } from './types';
+import { getCurrentProjectRoot } from '../current-project-root';
 
 const AGENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -199,7 +200,7 @@ export async function registerAgent(
   const name = trimOrEmpty(input.name);
   const role = trimOrEmpty(input.role);
   const display = trimOrEmpty(input.display) || name;
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   const agentIdError = validateAgentId(name);
   if (agentIdError) {
@@ -278,7 +279,7 @@ export async function listAgents(
   const command: AgentCommandName = 'agent list';
   const role = trimOrEmpty(input.role);
   const status = trimOrEmpty(input.status);
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   try {
     const listResult = await runBdCommand({
@@ -318,7 +319,7 @@ export async function showAgent(
 ): Promise<AgentCommandResponse<AgentRecord>> {
   const command: AgentCommandName = 'agent show';
   const name = trimOrEmpty(input.agent);
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   const agentIdError = validateAgentId(name);
   if (agentIdError) {
@@ -346,7 +347,7 @@ export async function setAgentState(
   const command: AgentCommandName = 'agent state';
   const name = trimOrEmpty(input.agent);
   const state = input.state;
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   const agentIdError = validateAgentId(name);
   if (agentIdError) {
@@ -399,7 +400,7 @@ export async function extendActivityLease(
 ): Promise<AgentCommandResponse<AgentRecord | null>> {
   const command: AgentCommandName = 'agent activity-lease';
   const name = trimOrEmpty(input.agent);
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   const agentIdError = validateAgentId(name);
   if (agentIdError) {

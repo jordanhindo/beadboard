@@ -1,9 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { AgentType, AgentArchetype, SwarmTemplate } from '../types-swarm';
+import { getCurrentProjectRoot } from '../current-project-root';
 
-const AGENT_DIR = path.join(process.cwd(), '.beads', 'archetypes');
-const TEMPLATE_DIR = path.join(process.cwd(), '.beads', 'templates');
+// Resolved on each call so they follow the current project root.
+const agentDir = () => path.join(getCurrentProjectRoot(), '.beads', 'archetypes');
+const templateDir = () => path.join(getCurrentProjectRoot(), '.beads', 'templates');
 
 export function slugify(name: string): string {
     return name
@@ -27,7 +29,7 @@ export type SaveAgentTypeInput = Partial<AgentType> & {
 export type SaveArchetypeInput = SaveAgentTypeInput;
 
 export async function saveAgentType(input: SaveAgentTypeInput): Promise<AgentType> {
-    await fs.mkdir(AGENT_DIR, { recursive: true });
+    await fs.mkdir(agentDir(), { recursive: true });
 
     const id = input.id || slugify(input.name);
     const now = new Date().toISOString();
@@ -36,7 +38,7 @@ export async function saveAgentType(input: SaveAgentTypeInput): Promise<AgentTyp
     let createdAt = input.createdAt || now;
 
     try {
-        const existingContent = await fs.readFile(path.join(AGENT_DIR, `${id}.json`), 'utf-8');
+        const existingContent = await fs.readFile(path.join(agentDir(), `${id}.json`), 'utf-8');
         const existing = JSON.parse(existingContent);
         if (existing.isBuiltIn) {
             isBuiltIn = true; // Protect built-in status
@@ -62,7 +64,7 @@ export async function saveAgentType(input: SaveAgentTypeInput): Promise<AgentTyp
     };
 
     await fs.writeFile(
-        path.join(AGENT_DIR, `${id}.json`),
+        path.join(agentDir(), `${id}.json`),
         JSON.stringify(agentType, null, 2)
     );
 
@@ -73,7 +75,7 @@ export async function saveAgentType(input: SaveAgentTypeInput): Promise<AgentTyp
 export const saveArchetype = saveAgentType;
 
 export async function deleteAgentType(id: string): Promise<void> {
-    const filePath = path.join(AGENT_DIR, `${id}.json`);
+    const filePath = path.join(agentDir(), `${id}.json`);
 
     let agentType: AgentType;
     try {
@@ -165,7 +167,7 @@ const SEED_AGENTS: AgentType[] = [
 /** @deprecated Use SEED_AGENTS instead */
 const SEED_ARCHETYPES = SEED_AGENTS;
 
-export async function getAgentTypes(projectRoot: string = process.cwd()): Promise<AgentType[]> {
+export async function getAgentTypes(projectRoot: string = getCurrentProjectRoot()): Promise<AgentType[]> {
     const agentDir = path.join(projectRoot, '.beads', 'archetypes');
     try {
         await fs.mkdir(agentDir, { recursive: true });
@@ -279,7 +281,7 @@ const SEED_TEMPLATES: SwarmTemplate[] = [
     }
 ];
 
-export async function getTemplates(projectRoot: string = process.cwd()): Promise<SwarmTemplate[]> {
+export async function getTemplates(projectRoot: string = getCurrentProjectRoot()): Promise<SwarmTemplate[]> {
     const templateDir = path.join(projectRoot, '.beads', 'templates');
     try {
         await fs.mkdir(templateDir, { recursive: true });
@@ -338,7 +340,7 @@ export type SaveTemplateInput = {
 };
 
 export async function saveTemplate(input: SaveTemplateInput): Promise<SwarmTemplate> {
-    await fs.mkdir(TEMPLATE_DIR, { recursive: true });
+    await fs.mkdir(templateDir(), { recursive: true });
 
     const agentTypes = await getAgentTypes();
     const validAgentTypeIds = new Set(agentTypes.map(a => a.id));
@@ -362,7 +364,7 @@ export async function saveTemplate(input: SaveTemplateInput): Promise<SwarmTempl
     let createdAt = input.createdAt || now;
 
     try {
-        const existingContent = await fs.readFile(path.join(TEMPLATE_DIR, `${id}.json`), 'utf-8');
+        const existingContent = await fs.readFile(path.join(templateDir(), `${id}.json`), 'utf-8');
         const existing = JSON.parse(existingContent);
         if (existing.isBuiltIn) {
             isBuiltIn = true; // Protect built-in status
@@ -388,7 +390,7 @@ export async function saveTemplate(input: SaveTemplateInput): Promise<SwarmTempl
     };
 
     await fs.writeFile(
-        path.join(TEMPLATE_DIR, `${id}.json`),
+        path.join(templateDir(), `${id}.json`),
         JSON.stringify(template, null, 2)
     );
 
@@ -396,7 +398,7 @@ export async function saveTemplate(input: SaveTemplateInput): Promise<SwarmTempl
 }
 
 export async function deleteTemplate(id: string): Promise<void> {
-    const filePath = path.join(TEMPLATE_DIR, `${id}.json`);
+    const filePath = path.join(templateDir(), `${id}.json`);
 
     let template: SwarmTemplate;
     try {

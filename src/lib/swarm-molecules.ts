@@ -1,5 +1,6 @@
 import { runBdCommand } from './bridge';
 import { showAgent, type AgentRecord } from './agent-registry';
+import { getCurrentProjectRoot } from './current-project-root';
 
 export type SwarmCommandName = 'swarm join' | 'swarm leave' | 'swarm members';
 
@@ -94,7 +95,7 @@ export async function joinSwarm(
   deps: { projectRoot?: string } = {}
 ): Promise<SwarmCommandResponse<AgentRecord>> {
   const command: SwarmCommandName = 'swarm join';
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
   const beadId = toBeadId(input.agent);
 
   const agentResult = await showAgent({ agent: input.agent }, { projectRoot });
@@ -136,7 +137,7 @@ export async function leaveSwarm(
   deps: { projectRoot?: string } = {}
 ): Promise<SwarmCommandResponse<AgentRecord>> {
   const command: SwarmCommandName = 'swarm leave';
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
   const beadId = toBeadId(input.agent);
 
   const agentResult = await showAgent({ agent: input.agent }, { projectRoot });
@@ -161,7 +162,7 @@ export async function getSwarmMembers(
   input: SwarmMembersInput,
   deps: { projectRoot?: string } = {}
 ): Promise<string[]> {
-  const projectRoot = deps.projectRoot || process.cwd();
+  const projectRoot = deps.projectRoot || getCurrentProjectRoot();
 
   const result = await runBd({ projectRoot, args: ['list', '--label', `swarm:${input.swarmId}`, '--json'] });
   if (!result.success) return [];

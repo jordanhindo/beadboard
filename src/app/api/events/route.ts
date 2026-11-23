@@ -4,6 +4,7 @@ import path from 'node:path';
 import { canonicalizeWindowsPath } from '../../../lib/pathing';
 import { issuesEventBus, activityEventBus, SSE_CONNECTED_FRAME, SSE_HEARTBEAT_FRAME, toSseFrame, toActivitySseFrame } from '../../../lib/realtime';
 import { getIssuesWatchManager } from '../../../lib/watcher';
+import { getCurrentProjectRoot } from '../../../lib/current-project-root';
 
 const encoder = new TextEncoder();
 const HEARTBEAT_MS = 15_000;
@@ -28,7 +29,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const projectRootSearchParam = url.searchParams.get('projectRoot');
-  const projectRoot = canonicalizeWindowsPath(projectRootSearchParam || process.cwd());
+  const projectRoot = canonicalizeWindowsPath(projectRootSearchParam || getCurrentProjectRoot());
 
   console.log(`[SSE /api/events] Connection request - raw param: "${projectRootSearchParam}", canonicalized: "${projectRoot}"`);
 

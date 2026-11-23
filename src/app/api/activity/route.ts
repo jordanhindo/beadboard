@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'node:path';
 import { activityEventBus } from '../../../lib/realtime';
+import { getCurrentProjectRoot } from '../../../lib/current-project-root';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,7 @@ function isValidProjectRoot(root: string): boolean {
       return false;
     }
     // Prevent path traversal by ensuring resolved path stays within the project root
-    const allowedBase = process.cwd();
+    const allowedBase = getCurrentProjectRoot();
     const relative = path.relative(allowedBase, resolved);
     // If "resolved" is outside "allowedBase", "relative" will start with ".."
     if (relative.startsWith('..') || path.isAbsolute(relative)) {

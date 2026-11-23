@@ -5,6 +5,7 @@ import { parseIssuesJsonl } from './parser';
 import { buildProjectContext } from './project-context';
 import { readIssuesViaDolt } from './read-issues-dolt';
 import type { BeadIssueWithProject, ProjectSource } from './types';
+import { getCurrentProjectRoot } from './current-project-root';
 
 export interface ReadIssuesOptions {
   projectRoot?: string;
@@ -15,7 +16,7 @@ export interface ReadIssuesOptions {
   skipAgentFilter?: boolean;
 }
 
-export function resolveIssuesJsonlPathCandidates(projectRoot: string = process.cwd()): string[] {
+export function resolveIssuesJsonlPathCandidates(projectRoot: string = getCurrentProjectRoot()): string[] {
   const baseDir = path.resolve(projectRoot, '.beads');
   return [
     path.join(baseDir, 'issues.jsonl'),
@@ -23,7 +24,7 @@ export function resolveIssuesJsonlPathCandidates(projectRoot: string = process.c
   ];
 }
 
-export function resolveIssuesJsonlPath(projectRoot: string = process.cwd()): string {
+export function resolveIssuesJsonlPath(projectRoot: string = getCurrentProjectRoot()): string {
   return resolveIssuesJsonlPathCandidates(projectRoot)[0];
 }
 
@@ -35,12 +36,13 @@ export async function writeIssuesToDisk(
   issues: BeadIssueWithProject[],
   options: ReadIssuesOptions = {}
 ): Promise<void> {
-  const projectRoot = options.projectRoot ?? process.cwd();
+  const projectRoot = options.projectRoot ?? getCurrentProjectRoot();
   const issuesJson = JSON.stringify(issues, null, 2);
 
   try {
     const { execFileSync } = await import('child_process');
     execFileSync('bd', ['audit', 'record', '--stdin'], {
+      cwd: projectRoot,
       input: issuesJson,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -52,7 +54,7 @@ export async function writeIssuesToDisk(
 }
 
 export async function readIssuesFromDisk(options: ReadIssuesOptions = {}): Promise<BeadIssueWithProject[]> {
-  const projectRoot = options.projectRoot ?? process.cwd();
+  const projectRoot = options.projectRoot ?? getCurrentProjectRoot();
   const project = buildProjectContext(projectRoot, {
     source: options.projectSource ?? 'local',
     addedAt: options.projectAddedAt ?? null,
